@@ -18,12 +18,26 @@ jobs:
       run: |
         net user runneradmin TomarJi99!
 
-    - name: Start Pinggy TCP Tunnel
+    - name: Start Pinggy Tunnel
       run: |
-        # Download cloudflared or use pinggy command via SSH
-        ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:3389 -N tcp@free.pinggy.io 2>&1 | Tee-Object -FilePath "pinggy.log" &
-        Start-Sleep -Seconds 8
-        Get-Content pinggy.log
+        Invoke-WebRequest -Uri "https://github.com/Pinggy-io/pinggy-cli/releases/latest/download/pinggy_windows_amd64.zip" -OutFile "pinggy.zip"
+        Expand-Archive pinggy.zip -DestinationPath .
+        
+        $process = Start-Process -FilePath ".\pinggy.exe" -ArgumentList "tcp 3389" -PassThru -NoNewWindow
+        Start-Sleep -Seconds 10
+        
+        # Web UI se tunnel address fetch karna
+        try {
+            $status = Invoke-RestMethod -Uri "http://localhost:4300/status"
+            Write-Host "========================================"
+            Write-Host "RDP ADDRESS: $($status.urls[0] -replace 'tcp://','')"
+            Write-Host "USERNAME:    runneradmin"
+            Write-Host "PASSWORD:    TomarJi99!"
+            Write-Host "========================================"
+        } catch {
+            Write-Host "Tunnel address fetch karne me issue aaya. Fallback SSH try kar rahe hain:"
+            cmd.exe /c "pinggy.exe -version"
+        }
 
     - name: Keep Alive Loop
       run: |
@@ -32,4 +46,3 @@ jobs:
             Start-Sleep -Seconds 60
             $i++
         }
-        
