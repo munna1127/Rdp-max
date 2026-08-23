@@ -16,37 +16,18 @@ jobs:
         netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
         net user runneradmin TomarJi99!
 
-    - name: Start Pinggy TCP Tunnel & Fetch URL
-      shell: powershell
+    - name: Start Pinggy TCP Tunnel
+      shell: cmd
       run: |
-        $job = Start-Job -ScriptBlock {
-            ssh -p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 0:127.0.0.1:3389 -L 4300:127.0.0.1:4300 tcp@free.pinggy.io 2>&1
-        }
-        
-        Write-Host "Tunnel establish ho raha hai, 15 seconds wait karein..."
-        Start-Sleep -Seconds 15
-        
-        try {
-            $res = Invoke-RestMethod -Uri "http://localhost:4300/urls" -Method Get
-            Write-Host "========================================"
-            Write-Host "RDP ADDRESS: $($res.urls[0])"
-            Write-Host "========================================"
-        } catch {
-            Start-Sleep -Seconds 5
-            try {
-                $res = Invoke-RestMethod -Uri "http://localhost:4300/urls" -Method Get
-                Write-Host "========================================"
-                Write-Host "RDP ADDRESS: $($res.urls[0])"
-                Write-Host "========================================"
-            } catch {
-                Write-Host "Fallback log check:"
-                Receive-Job -Job $job -Keep
-            }
-        }
-        
-        Write-Host "USERNAME: runneradmin"
-        Write-Host "PASSWORD: TomarJi99!"
-        Write-Host "========================================"
+        echo Tunnel start ho raha hai, 20 seconds wait karein...
+        start /b ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R 0:127.0.0.1:3389 tcp@free.pinggy.io > pinggy.log 2>&1
+        ping 127.0.0.1 -n 21 >nul
+        echo ========================================
+        type pinggy.log
+        echo ========================================
+        echo USERNAME: runneradmin
+        echo PASSWORD: TomarJi99!
+        echo ========================================
 
     - name: Keep Alive Loop
       shell: cmd
