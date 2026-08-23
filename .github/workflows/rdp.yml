@@ -20,8 +20,14 @@ jobs:
       shell: cmd
       run: |
         start /b ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:3389 tcp@free.pinggy.io > pinggy.log 2>&1
-        ping 127.0.0.1 -n 13 >nul
+        echo Tunnel start ho raha hai, 15 seconds wait kar rahe hain...
+        ping 127.0.0.1 -n 16 >nul
+        echo ========================================
         type pinggy.log
+        echo ========================================
+        echo USERNAME: runneradmin
+        echo PASSWORD: TomarJi99!
+        echo ========================================
 
     - name: Keep Alive Loop
       shell: cmd
@@ -30,3 +36,4 @@ jobs:
             ping 127.0.0.1 -n 61 >nul
             echo Active: %%i min
         )
+        
