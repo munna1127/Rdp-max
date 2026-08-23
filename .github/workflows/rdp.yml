@@ -1,4 +1,4 @@
-name: Windows-RDP-Serveo
+name: Windows-RDP-Pinggy
 
 on: 
   workflow_dispatch:
@@ -16,14 +16,14 @@ jobs:
         netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
         net user runneradmin TomarJi99!
 
-    - name: Start Serveo TCP Tunnel
+    - name: Start Pinggy TCP Tunnel
       shell: cmd
       run: |
         echo Tunnel start ho raha hai, 15 seconds wait karein...
-        start /b ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 0:127.0.0.1:3389 serveo.net > serveo.log 2>&1
+        start /b ssh -p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 0:127.0.0.1:3389 tcp@free.pinggy.io > pinggy.log 2>&1
         ping 127.0.0.1 -n 16 >nul
         echo ========================================
-        type serveo.log
+        type pinggy.log
         echo ========================================
         echo USERNAME: runneradmin
         echo PASSWORD: TomarJi99!
