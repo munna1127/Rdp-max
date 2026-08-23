@@ -1,0 +1,35 @@
+name: Windows-RDP-Pinggy
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Enable Windows RDP
+      run: |
+        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+
+    - name: Set Custom RDP Password
+      run: |
+        net user runneradmin TomarJi99!
+
+    - name: Start Pinggy TCP Tunnel
+      run: |
+        # Download cloudflared or use pinggy command via SSH
+        ssh -o StrictHostKeyChecking=no -p 443 -R0:localhost:3389 -N tcp@free.pinggy.io 2>&1 | Tee-Object -FilePath "pinggy.log" &
+        Start-Sleep -Seconds 8
+        Get-Content pinggy.log
+
+    - name: Keep Alive Loop
+      run: |
+        $i = 1
+        while ($i -le 360) {
+            Start-Sleep -Seconds 60
+            $i++
+        }
+        
