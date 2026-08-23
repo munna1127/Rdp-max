@@ -20,7 +20,7 @@ jobs:
       shell: cmd
       run: |
         echo Tunnel start ho raha hai, 15 seconds wait karein...
-        start /b ssh -p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 0:127.0.0.1:3389 tcp@free.pinggy.io > pinggy.log 2>&1
+        start /b cmd /c "ssh -p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 0:127.0.0.1:3389 tcp@free.pinggy.io > pinggy.log 2>&1"
         ping 127.0.0.1 -n 16 >nul
         echo ========================================
         type pinggy.log
@@ -36,3 +36,4 @@ jobs:
             ping 127.0.0.1 -n 61 >nul
             echo Active: %%i min
         )
+        
