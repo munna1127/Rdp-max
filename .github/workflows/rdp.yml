@@ -9,36 +9,25 @@ jobs:
     timeout-minutes: 360
 
     steps:
-    - name: Enable Windows RDP
+    - name: Enable Windows RDP & Set Password
+      shell: cmd
       run: |
-        Set-ItemProperty -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server' -Name "fDenyTSConnections" -Value 0
-        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
-
-    - name: Set Custom RDP Password
-      run: |
+        reg add "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+        netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
         net user runneradmin TomarJi99!
 
     - name: Start Pinggy TCP Tunnel
+      shell: cmd
       run: |
-        # Background job with pseudo-terminal allocation (-tt)
-        $job = Start-Job -ScriptBlock {
-            ssh -tt -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:3389 tcp@free.pinggy.io
-        }
-        
-        Start-Sleep -Seconds 12
-        
-        Write-Host "========================================"
-        Receive-Job -Job $job -Keep
-        Write-Host "========================================"
-        Write-Host "USERNAME: runneradmin"
-        Write-Host "PASSWORD: TomarJi99!"
-        Write-Host "========================================"
+        start /b ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:3389 tcp@free.pinggy.io > pinggy.log 2>&1
+        timeout /t 12 /nobreak >nul
+        type pinggy.log
 
     - name: Keep Alive Loop
+      shell: cmd
       run: |
-        $i = 1
-        while ($i -le 360) {
-            Start-Sleep -Seconds 60
-            $i++
-        }
+        for /L %%i in (1,1,360) do (
+            timeout /t 60 /nobreak >nul
+            echo Active: %%i min
+        )
         
