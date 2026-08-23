@@ -20,15 +20,15 @@ jobs:
 
     - name: Start Pinggy TCP Tunnel
       run: |
-        # SSH background process start karo aur output capture karo
-        Start-Process ssh -ArgumentList "-o StrictHostKeyChecking=no -p 443 -R0:localhost:3389 tcp@free.pinggy.io" -RedirectStandardOutput "pinggy.log" -RedirectStandardError "pinggy_err.log"
+        # Background job with pseudo-terminal allocation (-tt)
+        $job = Start-Job -ScriptBlock {
+            ssh -tt -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:3389 tcp@free.pinggy.io
+        }
         
-        # Address generate hone ka wait karo
         Start-Sleep -Seconds 12
         
         Write-Host "========================================"
-        Get-Content pinggy.log -ErrorAction SilentlyContinue
-        Get-Content pinggy_err.log -ErrorAction SilentlyContinue
+        Receive-Job -Job $job -Keep
         Write-Host "========================================"
         Write-Host "USERNAME: runneradmin"
         Write-Host "PASSWORD: TomarJi99!"
