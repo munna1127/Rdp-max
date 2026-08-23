@@ -1,4 +1,4 @@
-name: Windows-RDP-Pinggy
+name: Windows-RDP-Ngrok
 
 on: 
   workflow_dispatch:
@@ -16,14 +16,20 @@ jobs:
         netsh advfirewall firewall set rule group="remote desktop" new enable=Yes
         net user runneradmin TomarJi99!
 
-    - name: Start Pinggy TCP Tunnel
+    - name: Download & Setup Ngrok
       shell: cmd
       run: |
-        start /b ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:3389 tcp@free.pinggy.io > pinggy.log 2>&1
-        echo Tunnel start ho raha hai, 15 seconds wait kar rahe hain...
-        ping 127.0.0.1 -n 16 >nul
+        curl -sSL https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-windows-amd64.zip -o ngrok.zip
+        tar -xf ngrok.zip
+        ngrok config add-authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
+
+    - name: Start Ngrok TCP Tunnel
+      shell: cmd
+      run: |
+        start /b ngrok tcp 3389 > ngrok.log 2>&1
+        ping 127.0.0.1 -n 12 >nul
         echo ========================================
-        type pinggy.log
+        type ngrok.log
         echo ========================================
         echo USERNAME: runneradmin
         echo PASSWORD: TomarJi99!
