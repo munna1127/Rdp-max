@@ -20,14 +20,13 @@ jobs:
       shell: cmd
       run: |
         start /b ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:3389 tcp@free.pinggy.io > pinggy.log 2>&1
-        timeout /t 12 /nobreak >nul
+        ping 127.0.0.1 -n 13 >nul
         type pinggy.log
 
     - name: Keep Alive Loop
       shell: cmd
       run: |
         for /L %%i in (1,1,360) do (
-            timeout /t 60 /nobreak >nul
+            ping 127.0.0.1 -n 61 >nul
             echo Active: %%i min
         )
-        
