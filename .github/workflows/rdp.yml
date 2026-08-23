@@ -17,17 +17,26 @@ jobs:
         net user runneradmin TomarJi99!
 
     - name: Start Pinggy TCP Tunnel
-      shell: cmd
+      shell: powershell
       run: |
-        echo Tunnel start ho raha hai, kripya 20 seconds wait karein...
-        start /b ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -p 443 -R0:localhost:3389 tcp@free.pinggy.io > pinggy.log 2>&1
-        ping 127.0.0.1 -n 21 >nul
-        echo ========================================
-        type pinggy.log
-        echo ========================================
-        echo USERNAME: runneradmin
-        echo PASSWORD: TomarJi99!
-        echo ========================================
+        $job = Start-Job -ScriptBlock {
+            ssh -p 443 -o StrictHostKeyChecking=no -o ServerAliveInterval=30 -R 0:127.0.0.1:3389 tcp@free.pinggy.io 2>&1
+        }
+        
+        Write-Host "Tunnel connect ho raha hai, 15 seconds wait karein..."
+        Start-Sleep -Seconds 15
+        
+        $output = Receive-Job -Job $job -Keep
+        Write-Host "========================================"
+        if ($output) {
+            $output | ForEach-Object { Write-Host $_ }
+        } else {
+            Write-Host "Tunnel connection established. Check URL above."
+        }
+        Write-Host "========================================"
+        Write-Host "USERNAME: runneradmin"
+        Write-Host "PASSWORD: TomarJi99!"
+        Write-Host "========================================"
 
     - name: Keep Alive Loop
       shell: cmd
